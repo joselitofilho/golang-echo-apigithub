@@ -51,7 +51,7 @@ func GHInfos(ghLoopCh chan struct{}, ghClient *github.Client, org string, rankin
 
 			for _, member := range members {
 				ranking := models.Ranking{
-					Name:              member.GetName(),
+					Name:              member.GetLogin(),
 					AvatarURL:         member.GetAvatarURL(),
 					StargazersCount:   stargazersCount,
 					FollowersCount:    member.GetFollowers(),
@@ -59,7 +59,7 @@ func GHInfos(ghLoopCh chan struct{}, ghClient *github.Client, org string, rankin
 					ContributtedCount: contributions[member.GetLogin()],
 					Languages:         languages,
 				}
-				if err := rankingResource.Create(ranking); err != nil {
+				if err := rankingResource.Create(&ranking); err != nil {
 					// TODO: Implementar
 					fmt.Println("rankingResource.Create err:", err)
 				}
