@@ -3,6 +3,8 @@ module github.com/joselitofilho/golang-echo-apigithub
 go 1.16
 
 require (
+	github.com/google/go-github v17.0.0+incompatible
+	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/labstack/echo/v4 v4.3.0
 	github.com/lib/pq v1.10.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

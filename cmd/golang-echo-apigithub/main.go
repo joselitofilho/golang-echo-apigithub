@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/google/go-github/github"
+	"github.com/joselitofilho/golang-echo-apigithub/internal/api"
 	"github.com/joselitofilho/golang-echo-apigithub/internal/controllers"
 	"github.com/joselitofilho/golang-echo-apigithub/internal/models"
 	"github.com/joselitofilho/golang-echo-apigithub/internal/resources"
@@ -26,9 +28,16 @@ func main() {
 		panic(err)
 	}
 
-	rankingController := controllers.NewRankingController(resources.NewRankingResourceGormDB(gormDB))
+	rankingResource := resources.NewRankingResourceGormDB(gormDB)
+	rankingController := controllers.NewRankingController(rankingResource)
 	e.GET("/rankings", rankingController.List)
 	e.GET("/rankings/:id", rankingController.Get)
+
+	ghLoopCh := make(chan struct{})
+	ghClient := github.NewClient(nil)
+	org := "Instituto-Atlantico"
+	// org := "github"
+	go api.GHInfos(ghLoopCh, ghClient, org, rankingResource)
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
