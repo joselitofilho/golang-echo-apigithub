@@ -18,47 +18,51 @@ func GHInfos(ghLoopCh chan struct{}, ghClient *github.Client, org string, rankin
 				// TODO: Implementar
 				fmt.Println("ghClient.Organizations.ListMembers err:", err)
 			}
-			fmt.Println(len(members))
 
+			repos, _, err := ghClient.Repositories.ListByOrg(context.Background(), org, &github.RepositoryListByOrgOptions{})
+			if err != nil {
+				// TODO: Implementar
+				fmt.Println("ghClient.Repositories.ListByOrg err:", err)
+			}
+
+			contributions := map[string]int{}
 			for _, member := range members {
-				repos, _, err := ghClient.Repositories.List(context.Background(), *member.Login, &github.RepositoryListOptions{})
+				contributions[member.GetLogin()] = 0
+			}
+
+			languages := []models.Language{}
+			stargazersCount := 0
+			for _, repo := range repos {
+				if len(repo.GetLanguage()) > 0 {
+					languages = append(languages, models.Language{Name: repo.GetLanguage()})
+				}
+				stargazersCount += repo.GetStargazersCount()
+
+				contributors, _, err := ghClient.Repositories.ListContributors(context.Background(), repo.GetOwner().GetLogin(), repo.GetName(), &github.ListContributorsOptions{})
 				if err != nil {
 					// TODO: Implementar
-					fmt.Println("ghClient.Repositories.List err:", err)
+					fmt.Println("ghClient.Repositories.ListContributors err:", err)
 				}
 
-				languages := []models.Language{}
-				stargazersCount := 0
-				contributtedCount := 0
-				for _, repo := range repos {
-					if len(repo.GetLanguage()) > 0 {
-						languages = append(languages, models.Language{Name: repo.GetLanguage()})
-					}
-					stargazersCount += repo.GetStargazersCount()
-
-					contributorsStats, _, err := ghClient.Repositories.ListContributorsStats(context.Background(), repo.GetOwner(), repo.GetName())
-					if err != nil {
-						// TODO: Implementar
-						fmt.Println("ghClient.Repositories.ListContributorsStats err:", err)
-					}
-
-					for _, stats := range contributorsStats {
-						if stats.GetAuthor().GetID() == member.GetID() {
-							contributtedCount += stats.GetTotal()
-						}
-					}
+				for _, contributor := range contributors {
+					contributions[contributor.GetLogin()] += contributor.GetContributions()
 				}
+			}
 
+			for _, member := range members {
 				ranking := models.Ranking{
 					Name:              member.GetName(),
 					AvatarURL:         member.GetAvatarURL(),
 					StargazersCount:   stargazersCount,
 					FollowersCount:    member.GetFollowers(),
 					ProjectsCount:     member.GetPublicRepos(),
-					ContributtedCount: len(repos),
+					ContributtedCount: contributions[member.GetLogin()],
 					Languages:         languages,
 				}
-				rankingResource.Create(ranking)
+				if err := rankingResource.Create(ranking); err != nil {
+					// TODO: Implementar
+					fmt.Println("rankingResource.Create err:", err)
+				}
 			}
 
 			time.Sleep(24 * time.Hour)
