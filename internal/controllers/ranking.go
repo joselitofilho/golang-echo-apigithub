@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/joselitofilho/golang-echo-apigithub/internal/core"
 	"github.com/joselitofilho/golang-echo-apigithub/internal/models"
@@ -18,8 +19,23 @@ func NewRankingController(resource resources.RankingResource) *RankingController
 }
 
 func (c *RankingController) Get(ctx echo.Context) error {
-	id := ctx.Param("id")
-	return ctx.String(http.StatusOK, "Hello, World! "+id)
+	strId := ctx.Param("id")
+
+	id, err := strconv.ParseUint(strId, 10, 64)
+	if err != nil {
+		return ctx.NoContent(http.StatusNotFound)
+	}
+
+	ranking := models.Ranking{}
+	if err := c.resource.Get(id, &ranking); err != nil {
+		return ctx.NoContent(http.StatusNotFound)
+	}
+
+	if ranking.ID == 0 {
+		return ctx.NoContent(http.StatusNotFound)
+	}
+
+	return ctx.JSON(http.StatusOK, ranking)
 }
 
 func (c *RankingController) List(ctx echo.Context) error {

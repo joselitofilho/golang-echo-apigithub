@@ -13,6 +13,8 @@ import (
 func GHInfos(ghLoopCh chan struct{}, ghClient *github.Client, org string, rankingResource resources.RankingResource) {
 	for {
 		go func() {
+			fmt.Println("Retrieve github informations...")
+
 			members, _, err := ghClient.Organizations.ListMembers(context.Background(), org, &github.ListMembersOptions{ListOptions: github.ListOptions{PerPage: 10}})
 			if err != nil {
 				// TODO: Implementar
