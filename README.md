@@ -1,6 +1,6 @@
 # golang-echo-apigithub
 
-A estrutura desse projeto foi feita baseada em [Standard Go Project Layout](https://github.com/golang-standards/project-layout).
+This project is an API made in `Go` using the [Echo Web Framework](https://echo.labstack.com/) for buildind service, consuming the [GitHub API](https://docs.github.com/en/rest) and store data with [GormDB Library](https://gorm.io/) in the PostgreSQL database.
 
 ## Setup
 
@@ -18,5 +18,5 @@ $ docker-compose -f ./build/builder/docker-compose.yml exec service go run ./cmd
 
 Open in your browser or execute:
 ```bash
-$ curl -i -X GET http://localhost:1323/rankings/100
+$ curl -i -X GET http://localhost:1323/rankings
 ```
